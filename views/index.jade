@@ -1,0 +1,78 @@
+!!! 5
+//if lt IE 7
+  <html class="lt-ie9 lt-ie8 lt-ie7">
+//if IE 7
+  <html class="lt-ie9 lt-ie8">
+//if IE 8
+  <html class="lt-ie9">
+//[if gt IE 8]><!
+html
+  //<![endif]
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
+
+    title Yamok - Qettlhup JSON Generator
+
+    meta(name='description', content='')
+    meta(name='viewport', content='width=device-width')
+
+    link(rel='stylesheet', href='stylesheets/normalize.css')
+    link(rel='stylesheet', href='stylesheets/foundation.min.css')
+    link(rel='stylesheet', href='stylesheets/default.css')
+    //if lte IE 8
+      link(rel='stylesheet', href='stylesheets/ie.css')
+
+  body
+    //if lt IE 7
+      p.chromeframe.
+        You are using an outdated browser.
+        Please <a href="http://browsehappy.com/">upgrade your browser</a> or
+        <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a>
+        to improve your experience.
+
+    //Your content goes here
+
+    div.row
+      h1 Yamok
+      hr
+
+      div.panel.callout.radius
+        h2 Generate JSON files for Qettlhup
+        p Easily generate the necessary files for our GruntJS based automated testing plugin for Sauce Labs.
+
+      hr
+
+    div.row
+      h2 Choose the Browsers that you'd like to test against.
+      h4.subheader Be careful, the more browsers selected leads to longer test times, which uses more minutes on your Sauce Labs account.
+
+    div#browser-list.row
+
+    div.row
+      div#jsonOutput
+        textarea(style="width:100%; height:300px;")
+
+    //End Content
+    script.
+      var osArr = !{os};
+      var browserObj = !{browser};
+    script.
+      document.write('<script src=javascripts/'
+        + ('__proto__' in {} ? 'zepto' : 'jquery')
+        + '.js><\/script>');
+    script(src='javascripts/underscore-min.js')
+    script(src='javascripts/foundation.min.js')
+    script(src='javascripts/foundation/foundation.forms.js')
+    script(src='javascripts/yamok.js')
+
+    //if lte IE8
+      script(src='javascripts/selectivzr-min.js')
+      script(src='http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js')
+      script(type='text/javascript').
+        $(function(){
+          CFInstall.check({
+              mode: "overlay",
+              destination: "http://www.example.com"
+          });
+        })

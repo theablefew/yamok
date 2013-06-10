@@ -1,0 +1,9 @@
+@import 'bourbon/bourbon';
+@import 'neat/neat';
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#jsonOutput { margin-bottom: 150px; }
