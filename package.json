@@ -3,6 +3,10 @@
   "preferGlobal": "true",
   "version": "0.0.1",
   "private": true,
+  "engined" : {
+    "node" : "0.8.23",
+    "npm" : "1.2.18"
+  },
   "dependencies": {
     "express":        "~3.0.0",
     "socket.io":      ">= 0.9.13",
