@@ -3,4 +3,5 @@ module.exports = function (app, opts) {
 
   app.get('/', sessionRoutes.root)
   app.post('/generate', sessionRoutes.generate)
+  // app.get('/generate', sessionRoutes.generate)
 }

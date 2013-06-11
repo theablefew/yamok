@@ -2,18 +2,49 @@ $(document).foundation();
 
 $(function(){
   $(document).on('submit', 'form', function(e){
-    console.log('post');
     e.preventDefault();
+
+    if($('#testName').val()) {
+      var savedArr = [];
+      $(this).find(':checked').each(function(){
+        console.log(this.getAttribute('id'));
+        savedArr.push(this.getAttribute('id'));
+      });
+      localStorage[$('#testName').val()] = savedArr;
+    }
+
     $('#submitJson').val('Loading...').attr('disable', 'disable');
     $.post($(this).attr('action'), $(this).serialize(), function(data){
-      $('#jsonOutput textarea').val(data);
-      $('#submitJson').val('Submit').removeAttr('disable');
+      document.write(data);
     });
   });
 });
 
 $(function(){
-  // $('#browser-list').text('Loading...');
+  var a = document.createElement('a'), link;
+  for(var store in localStorage){
+    link = a.cloneNode();
+    link.textContent = store;
+    link.setAttribute('href', '#');
+    link.setAttribute('class', 'label radius secondary');
+    link.setAttribute('data-storage', store);
+    $('#saved-storage').append(link);
+  }
+
+  $(document).on('click', $('#saved-storage a'), function(e){
+    e.preventDefault();
+    $('input').find(':checked').removeAttr('checked');
+    $('.custom.checkbox.checked').removeClass('checked');
+    var storageArray = localStorage[$(this).data('storage')].split(',');
+    $('#testName').val($(this).text());
+    for(var i=0; i<storageArray.length; i++){
+      $('#'+storageArray[i]).attr('checked', 'checked');
+      $('#'+storageArray[i]).next('.custom').addClass('checked');
+    }
+  });
+});
+
+$(function(){
   var div = document.createElement('div');
   var h3 = document.createElement('h3');
   var ul = document.createElement('ul');
@@ -25,7 +56,6 @@ $(function(){
   var label = document.createElement('label');
   var input = document.createElement('input');
   var row = '';
-
 
   _.each(osArr, function(os, idx){
     if(idx % 3 === 0) {
@@ -77,14 +107,27 @@ $(function(){
   row = div.cloneNode();
   row.setAttribute('class', 'row');
 
-  var column = div.cloneNode();
-  column.setAttribute('class', 'large-4 large-offset-8 columns');
+  var nameColumn = div.cloneNode();
+  var nameInput = input.cloneNode();
+  var nameLabel = label.cloneNode();
+  nameColumn.setAttribute('class', 'large-4 large-offset-4 columns');
+  nameInput.setAttribute('type', 'text');
+  nameInput.setAttribute('name', 'testName');
+  nameInput.setAttribute('id', 'testName');
+  nameLabel.setAttribute('for', 'testName');
+  nameLabel.textContent = 'Save Test as: ';
+  nameColumn.appendChild(nameLabel);
+  nameColumn.appendChild(nameInput);
+  row.appendChild(nameColumn);
+
+  var submitColumn = div.cloneNode();
+  submitColumn.setAttribute('class', 'large-4 columns');
   var submit = input.cloneNode();
   submit.setAttribute('type', 'submit');
   submit.setAttribute('class', 'button');
   submit.setAttribute('id', 'submitJson');
-  column.appendChild(submit);
-  row.appendChild(column);
+  submitColumn.appendChild(submit);
+  row.appendChild(submitColumn);
   form.appendChild(row);
 
   document.getElementById('browser-list').appendChild(form);

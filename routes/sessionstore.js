@@ -22,7 +22,8 @@ module.exports = function sessionStoreRouteInit(opts) {
 
         for(var i=0; i<osList.length; i++) {
           browserByOS[osList[i]] = _.chain(response).where({os: osList[i]}).reject(function(os){
-            return (os.api_name.match(/proxy/ig) || os.api_name.match(/^chrome$/) || os.api_name.match(/^iehta$/));
+            var apiName = os.api_name;
+            return (apiName.match(/proxy/ig) || apiName.match(/^chrome$/) || apiName.match(/^iehta$/));
           });
         }
 
@@ -37,6 +38,7 @@ module.exports = function sessionStoreRouteInit(opts) {
 
   routes.generate = function(req, res){
     createJsonFile(req.body, generateFile, res);
+    // readFile(jsonPath, req, res);
   };
 
   return routes;
@@ -44,7 +46,13 @@ module.exports = function sessionStoreRouteInit(opts) {
 
 function generateFile(file, res) {
   var output = beautify(JSON.stringify(file), { indent_size: 4 });
-  res.render('generate.jade', {output: output});
+  var browserJson = parseJson(file);
+  res.render('generate.jade', {
+    os: JSON.stringify(browserJson.os),
+    browsers: JSON.stringify(browserJson.browsers),
+    versions: JSON.stringify(browserJson.versions),
+    output: output
+  });
 }
 
 function createJsonFile(data, callback, res){
@@ -104,4 +112,36 @@ function createJsonFile(data, callback, res){
 
   }
 
+}
+
+function parseJson(json) {
+  var out = {
+    os: null,
+    browsers: null,
+    versions: {}
+  };
+
+  out.os = _.keys(json);
+
+  out.browsers = _.chain(out.os).map(function(os){ return _.keys(json[os]) }).flatten().uniq();
+  out.browsers = out.browsers['_wrapped'];
+
+  _.chain(json).each(function(j){
+
+    _.each(out.os, function(os){
+      out.versions[os] = {};
+
+      _.each(out.browsers, function(browser){
+        out.versions[os][browser] = [];
+        if(json[os][browser]) {
+          for(var i=0; i<json[os][browser].length; i++){
+            out.versions[os][browser].push(json[os][browser][i].short_version);
+          }
+        }
+
+      });
+    })
+  });
+
+  return out;
 }

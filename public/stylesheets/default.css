@@ -1,11 +1,27 @@
+/* line 2, /Users/kknight/Sites/yamok/app/assets/stylesheets/neat/grid/_grid.scss */
 * {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
-  box-sizing: border-box; }
+  box-sizing: border-box;
+}
 
+/* line 4 */
 body {
   margin: 0;
-  padding: 0; }
+  padding: 0;
+}
 
+/* line 9 */
 #jsonOutput {
-  margin-bottom: 150px; }
+  margin-bottom: 150px;
+}
+
+/* line 10 */
+#saved-storage a {
+  margin: 0 5px 0 0;
+}
+
+/* line 11 */
+ul li label span {
+  margin: 0 5px 0 0;
+}

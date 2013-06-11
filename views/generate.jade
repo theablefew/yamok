@@ -1,1 +1,95 @@
-!{output}
+!!!
+html
+  head
+    title Browser Support
+    style.
+      .main { width: 75%; }
+      .main td { border: 1px solid #ccc; }
+      .main tr th:first-child { width: 150px; }
+      .main tr th { width: 100px; }
+      .main tr td div { text-align: center; }
+      .y { background-color: #9F3; }
+      .n { background-color: #F66; }
+      .p { background-color: #CC0; }
+    script.
+      var browsers = !{browsers};
+      var versions = !{versions};
+      var os = !{os};
+      function buildTable(opSys, browsers, versions) {
+        var table = document.createElement('table'),
+            thead = document.createElement('thead'),
+            tbody = document.createElement('tbody'),
+            div = document.createElement('div'),
+            tr = document.createElement('tr'),
+            td = document.createElement('td'),
+            th = document.createElement('th'),
+            headContent, headRow, rowContent, bodyRows,
+            allVersions = [];
+
+        table.setAttribute('class', 'main');
+
+        var blankSpot = th.cloneNode();
+        blankSpot.setAttribute('class', 'first');
+        headRow = tr.cloneNode();
+        headRow.appendChild(blankSpot);
+
+        for(var i=0; i<os.length; i++) {
+          headContent = th.cloneNode();
+          headContent.textContent = os[i];
+          headContent.setAttribute('style', "width: " + 100/os.length + "%;");
+          headRow.appendChild(headContent);
+        }
+
+        thead.appendChild(headRow);
+        table.appendChild(thead);
+
+        for(var name in browsers) {
+          bodyRows = tr.cloneNode();
+          rowContent = th.cloneNode();
+          rowContent.textContent = browsers[name];
+          bodyRows.appendChild(rowContent);
+
+          for(var i=0; i<os.length; i++) {
+            var output = '';
+            var browserId = '';
+            var divWrap = div.cloneNode();
+            rowContent = td.cloneNode();
+            for(var brwsr in versions[os[i]]) {
+              if(brwsr === browsers[name]) {
+                if(versions[os[i]][brwsr].length <= 0) {
+                  output = "";
+                } else if(versions[os[i]][brwsr].length === 1) {
+                  output = versions[os[i]][brwsr][0];
+                  browserId = (os[i] + browsers[name] + output).toLowerCase().replace(' ', '');
+                  divWrap.setAttribute('id', browserId);
+                  divWrap.innerHTML = output;
+                  rowContent.appendChild(divWrap);
+                } else {
+                  for(var l=0; l<versions[os[i]][brwsr].length; l++) {
+                    output += versions[os[i]][brwsr][l] + '<br>';
+                    browserId = (os[i] + browsers[name] + versions[os[i]][brwsr][l]).toLowerCase().replace(' ', '');
+                    divWrap.setAttribute('id', browserId);
+                    divWrap.innerHTML = output;
+                    rowContent.appendChild(divWrap);
+                  }
+                }
+              }
+            }
+
+            bodyRows.appendChild(rowContent);
+          }
+
+          tbody.appendChild(bodyRows);
+        }
+
+        table.appendChild(tbody);
+
+        var output = document.getElementById('table-data');
+        output.appendChild(table);
+      }
+
+  body
+    div#table-data
+
+    script.
+      buildTable(os, browsers, versions);
