@@ -1,24 +1,23 @@
-var sauce     = require('saucelabs');
-var _         = require('underscore');
+
+// var _         = require('underscore');
+var _         = require('lodash/dist/lodash.underscore');
 var beautify  = require('js-beautify').js_beautify;
 var fs        = require('fs');
-
-var myAccount = new sauce({
-    username: process.env.YAMOK_USER,
-    password: process.env.YAMOK_PASS,
-});
-var browserByOS = {}, browserByOSKeys = [];
+var browserByOS = {}, browserByOSKeys = [], redis;
 
 module.exports = function sessionStoreRouteInit(opts) {
   var routes = {};
+  redis = opts.sessionStore.client
 
   routes.root = function(req, res) {
 
-    myAccount.getSeleniumBrowsers( function (err, response) {
+    redis.get('seleniumBrowsers', function(err, response){
+      if(!err) {
+        response = JSON.parse(response);
         var osList = _.chain(response).map(function(os){
           return os.os
         }).uniq()
-        osList = osList['_wrapped'];
+        osList = osList['__wrapped__'];
 
         for(var i=0; i<osList.length; i++) {
           browserByOS[osList[i]] = _.chain(response).where({os: osList[i]}).reject(function(os){
@@ -31,14 +30,14 @@ module.exports = function sessionStoreRouteInit(opts) {
 
         res.render('index.jade', {
           browser: JSON.stringify(browserByOS),
-          os: JSON.stringify(browserByOSKeys['_wrapped'])
+          os: JSON.stringify(browserByOSKeys['__wrapped__'])
         });
+      }
     });
   };
 
   routes.generate = function(req, res){
     createJsonFile(req.body, generateFile, res);
-    // readFile(jsonPath, req, res);
   };
 
   return routes;
@@ -47,16 +46,15 @@ module.exports = function sessionStoreRouteInit(opts) {
 function generateFile(file, res) {
   var output = beautify(JSON.stringify(file), { indent_size: 4 });
   var browserJson = parseJson(file);
-  res.render('generate.jade', {
-    os: JSON.stringify(browserJson.os),
-    browsers: JSON.stringify(browserJson.browsers),
-    versions: JSON.stringify(browserJson.versions),
+  res.json({
+    os: browserJson.os,
+    browsers: browserJson.browsers,
+    versions: browserJson.versions,
     output: output
-  });
+  })
 }
 
 function createJsonFile(data, callback, res){
-
   var browser = '';
   var chosenBrowsers = [];
   var osList = '';
@@ -70,44 +68,50 @@ function createJsonFile(data, callback, res){
       data.browser = tmpArr;
     }
 
-    myAccount.getSeleniumBrowsers( function (err, response) {
-      osList = _.chain(response).map(function(os){
-        return os.os
-      }).uniq()
-      osList = osList['_wrapped'].sort().reverse();
+    redis.get('seleniumBrowsers', function(err, response){
+      if(!err) {
+        response = JSON.parse(response);
+        osList = _.chain(response).map(function(os){
+          return os.os
+        }).uniq()
+        osList = osList['__wrapped__'].sort().reverse();
 
-      if(data.browser.length > 1) {
-        _.each(data.browser, function(b){
-          // console.log(b);
-          browser = JSON.parse(b);
+        if(data.browser.length > 1) {
+          _.each(data.browser, function(b){
+            browser = JSON.parse(b);
+            var stuff = _.where(response, {os: browser.os, api_name: browser.api_name.match(/chrome/) ? 'googlechrome' : browser.api_name, long_version: browser.long_version});
+            if(!stuff[0].short_version)
+              stuff[0].short_version = stuff[0].long_version.split('.')[0];
+            chosenBrowsers.push(stuff);
+          });
+        } else {
+          browser = JSON.parse(data.browser);
           var stuff = _.where(response, {os: browser.os, api_name: browser.api_name, long_version: browser.long_version});
+          if(!stuff.short_version)
+            stuff.short_version = stuff.long_version.split('.')[0];
           chosenBrowsers.push(stuff);
-        });
-      } else {
-        browser = JSON.parse(data.browser);
-        var stuff = _.where(response, {os: browser.os, api_name: browser.api_name, long_version: browser.long_version});
-        chosenBrowsers.push(stuff);
-      }
-
-      _.each(osList, function(os){
-        output[os] = {};
-
-        _.each(chosenBrowsers, function(b){
-
-          if(os === b[0].os) {
-            var name = b[0].long_name;
-            if(!output[os][name]) output[os][name] = [];
-            var newObj = { "version": b[0].long_version, "short_version": b[0].short_version, "full_os": os }
-            output[os][name].push(newObj);
-          }
-
-        });
-        if(Object.keys(output[os]).length === 0) {
-          delete output[os];
         }
-      })
 
-      callback(output, res);
+        _.each(osList, function(os){
+          output[os] = {};
+
+          _.each(chosenBrowsers, function(b){
+            if(b[0]) {
+              if(os === b[0].os) {
+                var name = b[0].long_name;
+                if(!output[os][name]) output[os][name] = [];
+                var newObj = { "version": b[0].long_version, "short_version": b[0].short_version, "full_os": os }
+                output[os][name].push(newObj);
+              }
+            }
+          });
+          if(Object.keys(output[os]).length === 0) {
+            delete output[os];
+          }
+        })
+
+        callback(output, res);
+      }
     });
 
   }
@@ -124,7 +128,7 @@ function parseJson(json) {
   out.os = _.keys(json);
 
   out.browsers = _.chain(out.os).map(function(os){ return _.keys(json[os]) }).flatten().uniq();
-  out.browsers = out.browsers['_wrapped'];
+  out.browsers = out.browsers['__wrapped__'];
 
   _.chain(json).each(function(j){
 

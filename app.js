@@ -6,6 +6,7 @@ var crypto    = require('crypto');
 var http      = require('http');
 var colors    = require('colors');
 var fs        = require('fs');
+var sauce     = require('saucelabs');
 
 var app = express();
 var configuration = require('./config/environment');
@@ -17,6 +18,16 @@ var randomBytes = crypto.randomBytes(100);
 var randSecret = crypto.createHash('sha1').update(randomBytes).digest('hex');
 var fs = require('fs');
 var logFile = fs.createWriteStream('./log/'+ process.env.NODE_ENV + '.log', {flags: 'a'});
+
+var myAccount = new sauce({
+    username: process.env.YAMOK_USER,
+    password: process.env.YAMOK_PASS,
+});
+
+myAccount.getSeleniumBrowsers( function (err, response) {
+  if(!err)
+    redis.set('seleniumBrowsers', JSON.stringify(response));
+});
 
 if(process.env.NODE_ENV == 'development') {
   var cp = require('child_process');
@@ -51,4 +62,8 @@ app.configure('sandbox', function() {
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
-require('./routes/init')(app)
+var opts = {
+  sessionStore: sessionStore
+}
+
+require('./routes/init')(app, opts)

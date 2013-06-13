@@ -7,5 +7,38 @@ body {
 }
 
 #jsonOutput { margin-bottom: 150px; }
-#saved-storage a { margin: 0 5px 0 0; }
+#saved-storage span { margin: 0 5px 0 0; }
+#saved-storage span a.set-storage { margin: 0 5px 0 0; }
 ul li label span { margin: 0 5px 0 0; }
+
+#raw-data {
+  margin: 0 0 150px;
+  textarea {
+    width: 90%;
+    height: 300px;
+    margin: 0 auto;
+  }
+}
+
+.main {
+  width: 90%;
+  margin: 15px auto 50px;
+  tr {
+    th {
+      text-align: center;
+      width: 100px;
+      &:first-child { width: 150px; }
+    }
+    td {
+      vertical-align: top;
+      border: 1px solid #ccc;
+      div {
+        text-align: center;
+        &.y { background-color: #9F3; }
+        &.n { background-color: #F66; }
+        &.p { background-color: #CC0; }
+      }
+    }
+  }
+}
+

@@ -17,11 +17,63 @@ body {
 }
 
 /* line 10 */
-#saved-storage a {
+#saved-storage span {
   margin: 0 5px 0 0;
 }
 
 /* line 11 */
+#saved-storage span a.set-storage {
+  margin: 0 5px 0 0;
+}
+
+/* line 12 */
 ul li label span {
   margin: 0 5px 0 0;
+}
+
+/* line 14 */
+#raw-data {
+  margin: 0 0 150px;
+}
+/* line 16 */
+#raw-data textarea {
+  width: 90%;
+  height: 300px;
+  margin: 0 auto;
+}
+
+/* line 23 */
+.main {
+  width: 90%;
+  margin: 15px auto 50px;
+}
+/* line 27 */
+.main tr th {
+  text-align: center;
+  width: 100px;
+}
+/* line 30 */
+.main tr th:first-child {
+  width: 150px;
+}
+/* line 32 */
+.main tr td {
+  vertical-align: top;
+  border: 1px solid #ccc;
+}
+/* line 35 */
+.main tr td div {
+  text-align: center;
+}
+/* line 37 */
+.main tr td div.y {
+  background-color: #9F3;
+}
+/* line 38 */
+.main tr td div.n {
+  background-color: #F66;
+}
+/* line 39 */
+.main tr td div.p {
+  background-color: #CC0;
 }

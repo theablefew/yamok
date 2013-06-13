@@ -31,9 +31,9 @@ module.exports = function (grunt) {
       options: {
         banner: '//<%= pkg.name %> : <%= pkg.version %> : <%= grunt.template.today("yyyy-mm-dd") %>' + "\n"
       },
-      my_target: {
+      target: {
         files: {
-          'public/javascripts/yamok.js': ['app/assets/javascripts/*.js']
+          'public/javascripts/yamok.js': ['app/assets/javascripts/**/*.js']
         }
       }
     },

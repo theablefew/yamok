@@ -16,12 +16,14 @@
     "colors":         "*",
     "saucelabs":      "*",
     "underscore":     "*",
+    "lodash":     "*",
     "js-beautify":    "*",
     "supervisor":     "~0.5.0"
   },
   "devDependencies": {
     "shelljs": "*",
     "grunt": "*",
+    "grunt-qettlhup": "*",
     "grunt-contrib-sass": "*",
     "grunt-contrib-uglify": "*",
     "grunt-contrib-connect": "*",

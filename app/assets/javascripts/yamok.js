@@ -7,7 +7,6 @@ $(function(){
     if($('#testName').val()) {
       var savedArr = [];
       $(this).find(':checked').each(function(){
-        console.log(this.getAttribute('id'));
         savedArr.push(this.getAttribute('id'));
       });
       localStorage[$('#testName').val()] = savedArr;
@@ -15,31 +14,69 @@ $(function(){
 
     $('#submitJson').val('Loading...').attr('disable', 'disable');
     $.post($(this).attr('action'), $(this).serialize(), function(data){
-      document.write(data);
-    });
+      document.body.innerHTML = '';
+      var table = document.createElement('div');
+      table.setAttribute('id', 'table-data');
+
+      var raw = document.createElement('div');
+      raw.setAttribute('id', 'raw-data');
+
+      var textarea = document.createElement('textarea');
+      textarea.textContent = data.output;
+
+      raw.appendChild(textarea);
+      document.body.appendChild(table);
+      document.body.appendChild(raw);
+
+      buildTable(data.os, data.browsers, data.versions);
+    }, 'json');
   });
 });
 
 $(function(){
-  var a = document.createElement('a'), link;
+  var a = document.createElement('a'),
+      span = document.createElement('span'),
+      link, wrap, remove;
   for(var store in localStorage){
     link = a.cloneNode();
     link.textContent = store;
     link.setAttribute('href', '#');
-    link.setAttribute('class', 'label radius secondary');
     link.setAttribute('data-storage', store);
-    $('#saved-storage').append(link);
+    link.setAttribute('class', 'set-storage');
+
+    remove = a.cloneNode();
+    remove.innerHTML = '&times;';
+    remove.setAttribute('href', '#');
+    remove.setAttribute('data-remove', store);
+    remove.setAttribute('class', 'remove-storage');
+
+    wrap = span.cloneNode();
+    wrap.setAttribute('class', 'label radius secondary');
+    wrap.appendChild(link);
+    wrap.appendChild(remove);
+
+    document.getElementById('saved-storage').appendChild(wrap);
   }
 
-  $(document).on('click', $('#saved-storage a'), function(e){
+  $(document).on('click', $('a.set-storage'), function(e){
     e.preventDefault();
     $('input').find(':checked').removeAttr('checked');
     $('.custom.checkbox.checked').removeClass('checked');
+
     var storageArray = localStorage[$(this).data('storage')].split(',');
     $('#testName').val($(this).text());
     for(var i=0; i<storageArray.length; i++){
       $('#'+storageArray[i]).attr('checked', 'checked');
       $('#'+storageArray[i]).next('.custom').addClass('checked');
+    }
+  });
+
+  $(document).on('click', $('a.remove-storage'), function(e){
+    e.preventDefault();
+    var areYouSure = confirm('Are you sure?');
+    if(areYouSure) {
+      localStorage.removeItem($(this).data('remove'));
+      $(this).parent().fadeOut();
     }
   });
 });
@@ -73,11 +110,12 @@ $(function(){
     var list = ul.cloneNode();
     list.setAttribute('class', 'no-bullet');
 
-    _.each(browserObj[os]['_wrapped'], function(browser){
+    _.each(browserObj[os]['__wrapped__'], function(browser){
+      browser.api_name = browser.api_name.replace('googlechrome', 'chrome');
       var item = li.cloneNode();
       var checkbox = input.cloneNode();
       var lbl = label.cloneNode();
-      var name = (os + browser.api_name + browser.short_version).toLowerCase().replace(' ', '').replace('.', '');
+      var name = (os + browser.api_name + browser.short_version).toLowerCase().replace(' ', '').replace(/\./g, '');
 
       lbl.setAttribute('for', name);
       lbl.textContent = browser.long_name + ' ' + browser.short_version;
@@ -133,3 +171,78 @@ $(function(){
   document.getElementById('browser-list').appendChild(form);
 
 });
+
+function buildTable(os, browsers, versions) {
+  var table = document.createElement('table'),
+      thead = document.createElement('thead'),
+      tbody = document.createElement('tbody'),
+      div = document.createElement('div'),
+      tr = document.createElement('tr'),
+      td = document.createElement('td'),
+      th = document.createElement('th'),
+      headContent, headRow, rowContent, bodyRows,
+      allVersions = [];
+
+  table.setAttribute('class', 'main');
+
+  var blankSpot = th.cloneNode();
+  blankSpot.setAttribute('class', 'first');
+  headRow = tr.cloneNode();
+  headRow.appendChild(blankSpot);
+
+  for(var i=0; i<os.length; i++) {
+    headContent = th.cloneNode();
+    headContent.textContent = os[i];
+    headContent.setAttribute('style', "width: " + 100/os.length + "%;");
+    headRow.appendChild(headContent);
+  }
+
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+
+  for(var name in browsers) {
+    bodyRows = tr.cloneNode();
+    rowContent = th.cloneNode();
+    rowContent.textContent = browsers[name];
+    bodyRows.appendChild(rowContent);
+
+    for(var i=0; i<os.length; i++) {
+      var output = '';
+      var browserId = '';
+      var divWrap = '';
+      rowContent = td.cloneNode();
+      for(var brwsr in versions[os[i]]) {
+        if(brwsr === browsers[name]) {
+          if(versions[os[i]][brwsr].length <= 0) {
+            output = "";
+          } else if(versions[os[i]][brwsr].length === 1) {
+            output = versions[os[i]][brwsr][0];
+            browserId = (os[i] + browsers[name] + output).toLowerCase().replace(/ /g, '').replace(/\./g, '');
+            divWrap = div.cloneNode();
+            divWrap.setAttribute('id', browserId);
+            divWrap.innerHTML = output;
+            rowContent.appendChild(divWrap);
+          } else {
+            for(var l=0; l<versions[os[i]][brwsr].length; l++) {
+              output = versions[os[i]][brwsr][l];
+              browserId = (os[i] + browsers[name] + versions[os[i]][brwsr][l]).toLowerCase().replace(/ /g, '').replace(/\./g, '');
+              divWrap = div.cloneNode();
+              divWrap.setAttribute('id', browserId);
+              divWrap.innerHTML = output;
+              rowContent.appendChild(divWrap);
+            }
+          }
+        }
+      }
+
+      bodyRows.appendChild(rowContent);
+    }
+
+    tbody.appendChild(bodyRows);
+  }
+
+  table.appendChild(tbody);
+
+  var output = document.getElementById('table-data');
+  output.appendChild(table);
+}

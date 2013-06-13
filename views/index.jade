@@ -20,16 +20,8 @@ html
     link(rel='stylesheet', href='stylesheets/normalize.css')
     link(rel='stylesheet', href='stylesheets/foundation.min.css')
     link(rel='stylesheet', href='stylesheets/default.css')
-    //if lte IE 8
-      link(rel='stylesheet', href='stylesheets/ie.css')
 
   body
-    //if lt IE 7
-      p.chromeframe.
-        You are using an outdated browser.
-        Please <a href="http://browsehappy.com/">upgrade your browser</a> or
-        <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a>
-        to improve your experience.
 
     //Your content goes here
 
@@ -56,26 +48,14 @@ html
 
     //End Content
     script.
+      var osArr = !{os};
+      var browserObj = !{browser};
+    script.
       document.write('<script src=javascripts/'
         + ('__proto__' in {} ? 'zepto' : 'jquery')
         + '.js><\/script>');
-    script(src='javascripts/underscore-min.js')
 
-    script.
-      var osArr = !{os};
-      var browserObj = !{browser};
-
+    script(src='javascripts/lodash.underscore.min.js')
     script(src='javascripts/foundation.min.js')
     script(src='javascripts/foundation/foundation.forms.js')
     script(src='javascripts/yamok.js')
-
-    //if lte IE8
-      script(src='javascripts/selectivzr-min.js')
-      script(src='http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js')
-      script(type='text/javascript').
-        $(function(){
-          CFInstall.check({
-              mode: "overlay",
-              destination: "http://www.example.com"
-          });
-        })
