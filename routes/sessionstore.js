@@ -14,6 +14,7 @@ module.exports = function sessionStoreRouteInit(opts) {
     redis.get('seleniumBrowsers', function(err, response){
       if(!err) {
         response = JSON.parse(response);
+        console.log(response);
         var osList = _.chain(response).map(function(os){
           return os.os
         }).uniq()

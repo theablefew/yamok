@@ -24,7 +24,7 @@ var myAccount = new sauce({
     password: process.env.YAMOK_PASS,
 });
 
-myAccount.getSeleniumBrowsers( function (err, response) {
+myAccount.getWebDriverBrowsers( function (err, response) {
   if(!err)
     redis.set('seleniumBrowsers', JSON.stringify(response));
 });
